@@ -1,7 +1,13 @@
 #![cfg(feature = "test-sbf")]
 
+mod setup;
+
 use {
-    paladin_funnel_program::instruction::distribute_rewards,
+    paladin_funnel_program::{error::PaladinFunnelError, instruction::distribute_rewards},
+    paladin_governance_program::{state::get_treasury_address, ID as GOVERNANCE_PROGRAM_ID},
+    paladin_rewards_program_client::{accounts::HolderRewardsPool, ID as REWARDS_PROGRAM_ID},
+    paladin_stake_program_client::ID as STAKE_PROGRAM_ID,
+    setup::{setup, setup_holder_rewards_pool_account, setup_mint, setup_stake_config_account},
     solana_program_test::*,
     solana_sdk::{
         account::AccountSharedData,
@@ -15,34 +21,25 @@ use {
     test_case::test_case,
 };
 
-fn setup() -> ProgramTest {
-    ProgramTest::new(
-        "paladin_funnel_program",
-        paladin_funnel_program::id(),
-        processor!(paladin_funnel_program::processor::process),
-    )
-}
-
 #[tokio::test]
 async fn fail_payer_not_signer() {
-    let payer = Keypair::new();
-    let treasury_address = Pubkey::new_unique(); // TODO!
-    let stake_program_address = Pubkey::new_unique(); // TODO!
-    let stake_config_address = Pubkey::new_unique(); // TODO!
-    let rewards_program_address = Pubkey::new_unique(); // TODO!
-    let holder_rewards_pool_address = Pubkey::new_unique(); // TODO!
+    let payer = Pubkey::new_unique();
+    let stake_config_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
+
+    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
 
     let amount = 1_000_000;
 
     let mut context = setup().start_with_context().await;
 
     let mut instruction = distribute_rewards(
-        &payer.pubkey(),
+        &payer,
         &treasury_address,
-        &stake_program_address,
+        &STAKE_PROGRAM_ID,
         &stake_config_address,
-        &rewards_program_address,
+        &REWARDS_PROGRAM_ID,
         &holder_rewards_pool_address,
         &token_mint_address,
         amount,
@@ -69,29 +66,153 @@ async fn fail_payer_not_signer() {
     );
 }
 
-#[cfg(skip)]
 #[tokio::test]
-fn fail_incorrect_treasury_address() {}
+async fn fail_incorrect_treasury_address() {
+    let stake_config_address = Pubkey::new_unique();
+    let token_mint_address = Pubkey::new_unique();
 
-#[cfg(skip)]
-#[tokio::test]
-fn fail_incorrect_stake_program_id() {}
+    let treasury_address = Pubkey::new_unique(); // Incorrect treasury address.
+    let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
 
-#[cfg(skip)]
-#[tokio::test]
-fn fail_incorrect_stake_config_address() {}
+    let amount = 1_000_000;
 
-#[cfg(skip)]
-#[tokio::test]
-fn fail_incorrect_rewards_program_id() {}
+    let mut context = setup().start_with_context().await;
 
-#[cfg(skip)]
-#[tokio::test]
-fn fail_incorrect_holder_rewards_pool_address() {}
+    let instruction = distribute_rewards(
+        &context.payer.pubkey(),
+        &treasury_address,
+        &STAKE_PROGRAM_ID,
+        &stake_config_address,
+        &REWARDS_PROGRAM_ID,
+        &holder_rewards_pool_address,
+        &token_mint_address,
+        amount,
+    );
 
-#[cfg(skip)]
+    let transaction = Transaction::new_signed_with_payer(
+        &[instruction],
+        Some(&context.payer.pubkey()),
+        &[&context.payer],
+        context.last_blockhash,
+    );
+
+    let err = context
+        .banks_client
+        .process_transaction(transaction)
+        .await
+        .unwrap_err()
+        .unwrap();
+
+    assert_eq!(
+        err,
+        TransactionError::InstructionError(
+            0,
+            InstructionError::Custom(PaladinFunnelError::IncorrectTreasuryAddress as u32)
+        )
+    );
+}
+
 #[tokio::test]
-fn fail_incorrect_mint_address() {}
+async fn fail_incorrect_stake_program_id() {
+    let stake_config_address = Pubkey::new_unique();
+    let token_mint_address = Pubkey::new_unique();
+
+    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
+
+    let amount = 1_000_000;
+
+    let mut context = setup().start_with_context().await;
+
+    let instruction = distribute_rewards(
+        &context.payer.pubkey(),
+        &treasury_address,
+        &Pubkey::new_unique(), // Incorrect stake program ID.
+        &stake_config_address,
+        &REWARDS_PROGRAM_ID,
+        &holder_rewards_pool_address,
+        &token_mint_address,
+        amount,
+    );
+
+    let transaction = Transaction::new_signed_with_payer(
+        &[instruction],
+        Some(&context.payer.pubkey()),
+        &[&context.payer],
+        context.last_blockhash,
+    );
+
+    let err = context
+        .banks_client
+        .process_transaction(transaction)
+        .await
+        .unwrap_err()
+        .unwrap();
+
+    assert_eq!(
+        err,
+        TransactionError::InstructionError(
+            0,
+            InstructionError::Custom(PaladinFunnelError::IncorrectStakeProgramAddress as u32)
+        )
+    );
+}
+
+#[tokio::test]
+async fn fail_incorrect_rewards_program_id() {
+    let stake_config_address = Pubkey::new_unique();
+    let token_mint_address = Pubkey::new_unique();
+
+    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
+
+    let amount = 1_000_000;
+
+    let mut context = setup().start_with_context().await;
+
+    let instruction = distribute_rewards(
+        &context.payer.pubkey(),
+        &treasury_address,
+        &STAKE_PROGRAM_ID,
+        &stake_config_address,
+        &Pubkey::new_unique(), // Incorrect rewards program ID.
+        &holder_rewards_pool_address,
+        &token_mint_address,
+        amount,
+    );
+
+    let transaction = Transaction::new_signed_with_payer(
+        &[instruction],
+        Some(&context.payer.pubkey()),
+        &[&context.payer],
+        context.last_blockhash,
+    );
+
+    let err = context
+        .banks_client
+        .process_transaction(transaction)
+        .await
+        .unwrap_err()
+        .unwrap();
+
+    assert_eq!(
+        err,
+        TransactionError::InstructionError(
+            0,
+            InstructionError::Custom(PaladinFunnelError::IncorrectRewardsProgramAddress as u32)
+        )
+    );
+}
+
+async fn get_balance(context: &mut ProgramTestContext, address: &Pubkey) -> u64 {
+    context
+        .banks_client
+        .get_account(*address)
+        .await
+        .unwrap()
+        .unwrap()
+        .lamports
+}
 
 #[test_case(0)]
 #[test_case(1_000)]
@@ -99,46 +220,52 @@ fn fail_incorrect_mint_address() {}
 #[test_case(100_000_000)]
 #[tokio::test]
 async fn success(amount: u64) {
+    // Use a separate payer so its easier to track lamports.
     let payer = Keypair::new();
-    let treasury_address = Pubkey::new_unique(); // TODO!
-    let stake_program_address = Pubkey::new_unique(); // TODO!
-    let stake_config_address = Pubkey::new_unique(); // TODO!
-    let rewards_program_address = Pubkey::new_unique(); // TODO!
-    let holder_rewards_pool_address = Pubkey::new_unique(); // TODO!
+    let stake_config_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
+
+    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
 
     let mut context = setup().start_with_context().await;
     context.set_account(
         &payer.pubkey(),
-        &AccountSharedData::new(1_000_000 + amount, 0, &system_program::id()),
+        &AccountSharedData::new(1_000_000_000 + amount, 0, &system_program::id()),
     );
     context.set_account(
         &treasury_address,
-        &AccountSharedData::new(1_000_000, 0, &Pubkey::new_unique()), // TODO!
+        &AccountSharedData::new(1_000_000, 0, &GOVERNANCE_PROGRAM_ID),
     );
+    setup_stake_config_account(&mut context, &stake_config_address).await;
+    setup_holder_rewards_pool_account(
+        &mut context,
+        &holder_rewards_pool_address,
+        /* excess_lamports */ 0,
+        /* accumulated_rewards_per_token */ 0,
+    )
+    .await;
+    setup_mint(
+        &mut context,
+        &token_mint_address,
+        &Pubkey::new_unique(),
+        1_000_000_000,
+    )
+    .await;
 
     // For checks later.
-    let payer_beginning_lamports = context
-        .banks_client
-        .get_account(payer.pubkey())
-        .await
-        .unwrap()
-        .unwrap()
-        .lamports;
-    let treasury_beginning_lamports = context
-        .banks_client
-        .get_account(treasury_address)
-        .await
-        .unwrap()
-        .unwrap()
-        .lamports;
+    let payer_beginning_lamports = get_balance(&mut context, &payer.pubkey()).await;
+    let treasury_beginning_lamports = get_balance(&mut context, &treasury_address).await;
+    let stake_config_beginning_lamports = get_balance(&mut context, &stake_config_address).await;
+    let holder_rewards_pool_beginning_lamports =
+        get_balance(&mut context, &holder_rewards_pool_address).await;
 
     let instruction = distribute_rewards(
         &payer.pubkey(),
         &treasury_address,
-        &stake_program_address,
+        &STAKE_PROGRAM_ID,
         &stake_config_address,
-        &rewards_program_address,
+        &REWARDS_PROGRAM_ID,
         &holder_rewards_pool_address,
         &token_mint_address,
         amount,
@@ -157,26 +284,30 @@ async fn success(amount: u64) {
         .await
         .unwrap();
 
-    // Assert the payer was debited.
-    let payer_end_lamports = context
-        .banks_client
-        .get_account(payer.pubkey())
-        .await
-        .unwrap()
-        .unwrap()
-        .lamports;
-    assert_eq!(payer_end_lamports, payer_beginning_lamports - (amount / 10)); // TODO!
+    let payer_end_lamports = get_balance(&mut context, &payer.pubkey()).await;
+    let treasury_end_lamports = get_balance(&mut context, &treasury_address).await;
+    let stake_config_end_lamports = get_balance(&mut context, &stake_config_address).await;
+    let holder_rewards_pool_end_lamports =
+        get_balance(&mut context, &holder_rewards_pool_address).await;
 
-    // Assert the treasury was credited.
-    let treasury_end_lamports = context
-        .banks_client
-        .get_account(treasury_address)
-        .await
-        .unwrap()
-        .unwrap()
-        .lamports;
+    // Assert the payer was debited the full amount.
+    assert_eq!(payer_end_lamports, payer_beginning_lamports - amount);
+
+    // Assert the treasury was credited 10% of the amount.
     assert_eq!(
         treasury_end_lamports,
         treasury_beginning_lamports + (amount / 10)
-    ); // TODO!
+    );
+
+    // Assert the stake config account was credited 40% of the amount.
+    assert_eq!(
+        stake_config_end_lamports,
+        stake_config_beginning_lamports + (amount * 2 / 5)
+    );
+
+    // Assert the holder rewards pool was credited 50% of the amount.
+    assert_eq!(
+        holder_rewards_pool_end_lamports,
+        holder_rewards_pool_beginning_lamports + (amount / 2)
+    );
 }

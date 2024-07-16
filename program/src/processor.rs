@@ -1,7 +1,10 @@
 //! Program processor.
 
 use {
-    crate::instruction::PaladinFunnelInstruction,
+    crate::{error::PaladinFunnelError, instruction::PaladinFunnelInstruction},
+    paladin_governance_program::{state::get_treasury_address, ID as GOVERNANCE_PROGRAM_ID},
+    paladin_rewards_program_client::ID as REWARDS_PROGRAM_ID,
+    paladin_stake_program_client::ID as STAKE_PROGRAM_ID,
     solana_program::{
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
@@ -55,11 +58,11 @@ fn process_distribute_rewards(
 
     let payer_info = next_account_info(accounts_iter)?;
     let treasury_info = next_account_info(accounts_iter)?;
-    let _stake_program_info = next_account_info(accounts_iter)?;
-    let _stake_config_info = next_account_info(accounts_iter)?;
-    let _rewards_program_info = next_account_info(accounts_iter)?;
-    let _holder_rewards_pool_info = next_account_info(accounts_iter)?;
-    let _mint_info = next_account_info(accounts_iter)?;
+    let stake_program_info = next_account_info(accounts_iter)?;
+    let stake_config_info = next_account_info(accounts_iter)?;
+    let rewards_program_info = next_account_info(accounts_iter)?;
+    let holder_rewards_pool_info = next_account_info(accounts_iter)?;
+    let mint_info = next_account_info(accounts_iter)?;
     let _system_program_info = next_account_info(accounts_iter)?;
 
     // Ensure the payer account is a signer.
@@ -68,28 +71,30 @@ fn process_distribute_rewards(
     }
 
     // Ensure the proper treasury account was provided.
-    // TODO: Use the address derivation helper from the Governance program.
+    if get_treasury_address(&GOVERNANCE_PROGRAM_ID) != *treasury_info.key {
+        return Err(PaladinFunnelError::IncorrectTreasuryAddress.into());
+    }
 
     // Ensure the proper stake program was provided.
-    // TODO: This needs to be configured somewhere.
-
-    // Ensure the proper stake config account was provided.
-    // TODO: Use the address derivation helper from the Stake program.
+    if stake_program_info.key != &STAKE_PROGRAM_ID {
+        return Err(PaladinFunnelError::IncorrectStakeProgramAddress.into());
+    }
 
     // Ensure the proper rewards program was provided.
-    // TODO: This needs to be configured somewhere.
-
-    // Ensure the proper holder rewards account was provided.
-    // TODO: Use the address derivation helper from the Rewards program.
-
-    // Ensure the proper mint for the holder rewards account was provided.
-    // TODO: Use the address derivation helper from the Rewards program.
+    if rewards_program_info.key != &REWARDS_PROGRAM_ID {
+        return Err(PaladinFunnelError::IncorrectRewardsProgramAddress.into());
+    }
 
     let RewardDistribution {
         treasury_reward,
-        stakers_reward: _,
-        holders_reward: _,
+        stakers_reward,
+        holders_reward,
     } = calculate_distribution(amount)?;
+
+    msg!("Amount: {}", amount);
+    msg!("Treasury reward: {}", treasury_reward);
+    msg!("Stakers reward: {}", stakers_reward);
+    msg!("Holders reward: {}", holders_reward);
 
     // Transfer to the treasury.
     invoke(
@@ -98,10 +103,29 @@ fn process_distribute_rewards(
     )?;
 
     // CPI to the Stake program to distribute staker rewards.
-    // TODO: CPI...
+    invoke(
+        &paladin_stake_program_client::instructions::DistributeRewardsBuilder::new()
+            .payer(*payer_info.key)
+            .config(*stake_config_info.key)
+            .args(stakers_reward)
+            .instruction(),
+        &[payer_info.clone(), stake_config_info.clone()],
+    )?;
 
     // CPI to the Rewards program to distribute holder rewards.
-    // TODO: CPI...
+    invoke(
+        &paladin_rewards_program_client::instructions::DistributeRewardsBuilder::new()
+            .payer(*payer_info.key)
+            .holder_rewards_pool(*holder_rewards_pool_info.key)
+            .mint(*mint_info.key)
+            .args(holders_reward)
+            .instruction(),
+        &[
+            payer_info.clone(),
+            holder_rewards_pool_info.clone(),
+            mint_info.clone(),
+        ],
+    )?;
 
     Ok(())
 }
