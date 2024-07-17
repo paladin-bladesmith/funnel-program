@@ -6,4 +6,4 @@ pub mod error;
 pub mod instruction;
 pub mod processor;
 
-solana_program::declare_id!("Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ");
+solana_program::declare_id!("CF2na53jt22yAQpkw2Uqc1KSNyfiR5p1NzV9XGUa7UbR");

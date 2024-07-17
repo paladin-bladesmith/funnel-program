@@ -1,0 +1,67 @@
+{
+  "version": "0.0.1",
+  "name": "paladin_funnel_program",
+  "instructions": [
+    {
+      "name": "DistributeRewards",
+      "accounts": [
+        {
+          "name": "payerAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "treasuryAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "paladinStakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeConfigAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "paladinRewardsProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "holderRewardsPoolAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    }
+  ],
+  "metadata": {
+    "origin": "shank",
+    "address": "CF2na53jt22yAQpkw2Uqc1KSNyfiR5p1NzV9XGUa7UbR",
+    "binaryVersion": "0.4.2",
+    "libVersion": "0.4.2"
+  }
+}

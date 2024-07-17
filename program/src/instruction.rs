@@ -1,14 +1,18 @@
 //! Program instruction types.
 
-use solana_program::{
-    instruction::{AccountMeta, Instruction},
-    program_error::ProgramError,
-    pubkey::Pubkey,
-    system_program,
+use {
+    shank::ShankInstruction,
+    solana_program::{
+        instruction::{AccountMeta, Instruction},
+        program_error::ProgramError,
+        pubkey::Pubkey,
+        system_program,
+    },
 };
 
 /// Instructions supported by the Paladin Rewards Funnel program.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[rustfmt::skip]
+#[derive(Clone, Copy, Debug, PartialEq, ShankInstruction)]
 pub enum PaladinFunnelInstruction {
     /// Distribute rewards to the entire Paladin system.
     ///
@@ -36,6 +40,43 @@ pub enum PaladinFunnelInstruction {
     /// 5. `[w]` Holder rewards pool account.
     /// 6. `[ ]` Token mint.
     /// 7. `[ ]` System program.
+    #[account(
+        0,
+        writable,
+        signer,
+        name = "Payer account"
+    )]
+    #[account(
+        1,
+        writable,
+        name = "Treasury account"
+    )]
+    #[account(
+        2,
+        name = "Paladin Stake program"
+    )]
+    #[account(
+        3,
+        writable,
+        name = "Stake config account"
+    )]
+    #[account(
+        4,
+        name = "Paladin Rewards program"
+    )]
+    #[account(
+        5,
+        writable,
+        name = "Holder rewards pool account"
+    )]
+    #[account(
+        6,
+        name = "Token mint"
+    )]
+    #[account(
+        7,
+        name = "System program"
+    )]
     DistributeRewards { amount: u64 },
 }
 
