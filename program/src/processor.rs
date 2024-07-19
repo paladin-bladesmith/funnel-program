@@ -26,9 +26,6 @@ struct RewardDistribution {
 // * 40% to all token stakers.
 // * 50% to all token holders.
 fn calculate_distribution(amount: u64) -> Result<RewardDistribution, ProgramError> {
-    let treasury_reward = amount
-        .checked_div(10)
-        .ok_or(ProgramError::InvalidInstructionData)?;
     let stakers_reward = amount
         .checked_mul(2)
         .and_then(|v| v.checked_div(5))
@@ -36,6 +33,11 @@ fn calculate_distribution(amount: u64) -> Result<RewardDistribution, ProgramErro
     let holders_reward = amount
         .checked_div(2)
         .ok_or(ProgramError::InvalidInstructionData)?;
+    let treasury_reward = amount
+        .checked_sub(holders_reward)
+        .unwrap()
+        .checked_sub(stakers_reward)
+        .unwrap();
 
     Ok(RewardDistribution {
         treasury_reward,
