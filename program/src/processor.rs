@@ -16,7 +16,7 @@ use {
     },
 };
 
-#[allow(unused)]
+#[derive(Debug, PartialEq)]
 struct RewardDistribution {
     treasury_reward: u64,
     stakers_reward: u64,
@@ -37,9 +37,9 @@ fn calculate_distribution(amount: u64) -> Result<RewardDistribution, ProgramErro
         .checked_div(2)
         .ok_or(ProgramError::InvalidInstructionData)?;
     let treasury_reward = amount
-        .checked_sub(holders_reward)
-        .unwrap()
         .checked_sub(stakers_reward)
+        .unwrap()
+        .checked_sub(holders_reward)
         .unwrap();
 
     Ok(RewardDistribution {
@@ -135,6 +135,78 @@ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> P
         PaladinFunnelInstruction::DistributeRewards { amount } => {
             msg!("Instruction: DistributeRewards");
             process_distribute_rewards(program_id, accounts, amount)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use {super::*, proptest::prelude::*};
+
+    proptest! {
+        #[test]
+        fn test_calculate_distribution(
+            amount in 0u64..,
+        ) {
+            // Calculate.
+            let result = calculate_distribution(amount);
+            // Evaluate.
+
+            // The calculation consists of three steps, so evaluate each step
+            // one at a time.
+            //
+            // 1. stakers rewards
+            // 2. holders rewards
+            // 3. treasury rewards
+
+            // Step 1.
+            let stakers_reward_num = amount.checked_mul(2);
+            if stakers_reward_num.is_none() {
+                // If the stakers rewards numerator multiplication breaks the
+                // u64 ceiling, the function should return an error.
+                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
+                return Ok(());
+            }
+            let stakers_reward = stakers_reward_num.unwrap().checked_div(5);
+            if stakers_reward.is_none() {
+                // If the stakers rewards denominator division fails, the
+                // function should return an error.
+                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
+                return Ok(());
+            }
+
+            // Step 2.
+            let holders_reward = amount.checked_div(2);
+            if holders_reward.is_none() {
+                // If the holders rewards division fails, the function should
+                // return an error.
+                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
+                return Ok(());
+            }
+
+            // Step 3.
+            let incr_treasury_reward = amount.checked_sub(stakers_reward.unwrap());
+            if incr_treasury_reward.is_none() {
+                // If the stakers rewards subtraction fails, the function should
+                // return an error.
+                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
+                return Ok(());
+            }
+            let treasury_reward = incr_treasury_reward.unwrap().checked_sub(holders_reward.unwrap());
+            if treasury_reward.is_none() {
+                // If the holders rewards subtraction fails, the function should
+                // return an error.
+                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
+                return Ok(());
+            } else {
+                // If all steps succeed, the function should return the correct
+                // distribution.
+                prop_assert_eq!(result, Ok(RewardDistribution {
+                    treasury_reward: treasury_reward.unwrap(),
+                    stakers_reward: stakers_reward.unwrap(),
+                    holders_reward: holders_reward.unwrap(),
+                }));
+            }
         }
     }
 }
