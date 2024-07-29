@@ -1,0 +1,91 @@
+{
+  "version": "0.0.1",
+  "name": "paladin_funnel_program",
+  "instructions": [
+    {
+      "name": "DistributeRewards",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer account"
+          ]
+        },
+        {
+          "name": "treasury",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Treasury account"
+          ]
+        },
+        {
+          "name": "paladinStakeProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Paladin Stake program"
+          ]
+        },
+        {
+          "name": "stakeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Stake config account"
+          ]
+        },
+        {
+          "name": "paladinRewardsProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Paladin Rewards program"
+          ]
+        },
+        {
+          "name": "holderRewardsPool",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Holder rewards pool account"
+          ]
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Token mint"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    }
+  ],
+  "metadata": {
+    "origin": "shank",
+    "address": "Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ",
+    "binaryVersion": "0.4.2",
+    "libVersion": "0.4.2"
+  }
+}
