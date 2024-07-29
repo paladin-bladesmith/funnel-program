@@ -1,11 +1,10 @@
 [package]
 name = "paladin-funnel-program-client"
-version = "0.0.0"
+version = "0.0.1"
 description = "A generated Rust library for the Funnel program"
-repository = "https://github.com/solana-program/funnel"
+repository = "https://github.com/paladin-bladesmith/funnel"
 edition = "2021"
 readme = "README.md"
-license-file = "../../LICENSE"
 
 [features]
 test-sbf = []
