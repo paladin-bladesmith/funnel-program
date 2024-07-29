@@ -4,7 +4,7 @@
 use {
     borsh::BorshSerialize,
     paladin_rewards_program_client::{accounts::HolderRewardsPool, ID as REWARDS_PROGRAM_ID},
-    paladin_stake_program_client::{accounts::Stake, NullableU64, ID as STAKE_PROGRAM_ID},
+    paladin_stake_program_client::{accounts::Config as StakeConfig, ID as STAKE_PROGRAM_ID},
     solana_program_test::*,
     solana_sdk::{
         account::{Account, AccountSharedData},
@@ -76,18 +76,19 @@ pub async fn setup_stake_config_account(
     stake_config_address: &Pubkey,
 ) {
     // Have to do this manually until the Stake program client is ready.
-    let preimage = solana_program::hash::hash(b"stake::state::stake");
+    let preimage = solana_program::hash::hash(b"stake::state::config");
     let discriminator: [u8; 8] = preimage.to_bytes()[..8].try_into().unwrap();
-    let state = Stake {
+    let state = StakeConfig {
         discriminator,
-        amount: 0,
-        deactivation_timestamp: NullableU64::from(0),
-        deactivating_amount: 0,
-        inactive_amount: 0,
-        authority: Pubkey::new_unique(),
-        validator: Pubkey::new_unique(),
-        last_seen_holder_rewards: 0,
-        last_seen_stake_rewards: 0,
+        authority: Pubkey::new_unique().into(),
+        slash_authority: Pubkey::new_unique().into(),
+        vault: Pubkey::new_unique(),
+        cooldown_time_seconds: 0,
+        token_amount_delegated: 0,
+        accumulated_stake_rewards_per_token: 0,
+        max_deactivation_basis_points: 0,
+        vault_authority_bump: 0,
+        padding: [0; 5],
     };
     let data = BorshSerialize::try_to_vec(&state).unwrap();
 
@@ -99,7 +100,7 @@ pub async fn setup_stake_config_account(
         &AccountSharedData::from(Account {
             lamports,
             data,
-            owner: REWARDS_PROGRAM_ID,
+            owner: STAKE_PROGRAM_ID,
             ..Account::default()
         }),
     );

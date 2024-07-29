@@ -2418,8 +2418,8 @@ dependencies = [
 
 [[package]]
 name = "paladin-rewards-program-client"
-version = "0.0.0"
-source = "git+https://github.com/paladin-bladesmith/rewards-program.git?branch=version#38e48ff5e11d3e61d58d89953f816ddec62ef62e"
+version = "0.0.1"
+source = "git+https://github.com/paladin-bladesmith/rewards-program.git#41452060035bde61718f6fe2d595df2b24d47170"
 dependencies = [
  "borsh 0.10.3",
  "num-derive 0.3.3",
@@ -2449,7 +2449,7 @@ dependencies = [
 [[package]]
 name = "paladin-stake-program-client"
 version = "0.0.1"
-source = "git+https://github.com/paladin-bladesmith/stake-program.git?branch=version#7214513a6b962bdcaaad93607c6b631966f29e0e"
+source = "git+https://github.com/paladin-bladesmith/stake-program.git#deb674ebc64792566b72c220f62770d1b3d8ef84"
 dependencies = [
  "borsh 0.10.3",
  "num-derive 0.3.3",

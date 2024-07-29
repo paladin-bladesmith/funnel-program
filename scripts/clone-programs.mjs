@@ -19,7 +19,7 @@ async function cloneProgram(programName) {
     } else {
         // If the program hasn't been cloned yet, clone it.
         echo(chalk.blue(`Directory ${targetDir} does not exist. Cloning...`));
-        await $`git clone ${repoUrl} --branch version ${targetDir}`.quiet();
+        await $`git clone ${repoUrl} ${targetDir}`.quiet();
     }
 
     // Build the program.

@@ -91,11 +91,6 @@ fn process_distribute_rewards(
         holders_reward,
     } = calculate_distribution(amount)?;
 
-    msg!("Amount: {}", amount);
-    msg!("Treasury reward: {}", treasury_reward);
-    msg!("Stakers reward: {}", stakers_reward);
-    msg!("Holders reward: {}", holders_reward);
-
     // Transfer to the treasury.
     invoke(
         &system_instruction::transfer(payer_info.key, treasury_info.key, treasury_reward),
@@ -107,7 +102,7 @@ fn process_distribute_rewards(
         &paladin_stake_program_client::instructions::DistributeRewardsBuilder::new()
             .payer(*payer_info.key)
             .config(*stake_config_info.key)
-            .args(stakers_reward)
+            .amount(stakers_reward)
             .instruction(),
         &[payer_info.clone(), stake_config_info.clone()],
     )?;
