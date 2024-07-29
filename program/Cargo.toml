@@ -9,12 +9,17 @@ edition = "2021"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
+paladin-governance-program = { git = "https://github.com/paladin-bladesmith/governance-program.git" }
+paladin-rewards-program-client = { git = "https://github.com/paladin-bladesmith/rewards-program.git" }
+paladin-stake-program-client = { git = "https://github.com/paladin-bladesmith/stake-program.git" }
 solana-program = "2.0.2"
 spl-program-error = "0.5.0"
 
 [dev-dependencies]
+borsh = "^0.10"
 solana-program-test = "2.0.2"
 solana-sdk = "2.0.2"
+spl-token-2022 = "4.0.0"
 test-case = "3.3.1"
 
 [features]
