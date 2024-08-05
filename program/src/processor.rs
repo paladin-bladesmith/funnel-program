@@ -167,46 +167,35 @@ mod tests {
                 prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
                 return Ok(());
             }
-            let stakers_reward = stakers_reward_num.unwrap().checked_div(5);
-            if stakers_reward.is_none() {
-                // If the stakers rewards denominator division fails, the
-                // function should return an error.
-                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
-                return Ok(());
-            }
+            // Since we're always dividing by 5, the division should never
+            // return `None`, so we can unwrap here.
+            let stakers_reward = stakers_reward_num.unwrap().checked_div(5).unwrap();
 
             // Step 2.
-            let holders_reward = amount.checked_div(2);
-            if holders_reward.is_none() {
-                // If the holders rewards division fails, the function should
-                // return an error.
-                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
-                return Ok(());
-            }
+            //
+            // Since we're always dividing by 2, the division should never
+            // return `None`, so we can unwrap here.
+            let holders_reward = amount.checked_div(2).unwrap();
 
             // Step 3.
-            let incr_treasury_reward = amount.checked_sub(stakers_reward.unwrap());
-            if incr_treasury_reward.is_none() {
-                // If the stakers rewards subtraction fails, the function should
-                // return an error.
-                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
-                return Ok(());
-            }
-            let treasury_reward = incr_treasury_reward.unwrap().checked_sub(holders_reward.unwrap());
-            if treasury_reward.is_none() {
-                // If the holders rewards subtraction fails, the function should
-                // return an error.
-                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
-                return Ok(());
-            } else {
-                // If all steps succeed, the function should return the correct
-                // distribution.
-                prop_assert_eq!(result, Ok(RewardDistribution {
-                    treasury_reward: treasury_reward.unwrap(),
-                    stakers_reward: stakers_reward.unwrap(),
-                    holders_reward: holders_reward.unwrap(),
-                }));
-            }
+            //
+            // Since we're always subtracting the stakers and holders rewards
+            // from the total amount, the subtraction should never return
+            // `None`, so we can unwrap here.
+            //
+            // This is because, if the above math succeeds, we know that the
+            // stakers rewards are 40% of the amount and the holders rewards are
+            // 50% of the amount.
+            let treasury_reward = amount
+                .checked_sub(stakers_reward)
+                .and_then(|d| d.checked_sub(holders_reward))
+                .unwrap();
+            // The function should return the correct distribution.
+            prop_assert_eq!(result, Ok(RewardDistribution {
+                treasury_reward,
+                stakers_reward,
+                holders_reward,
+            }));
         }
     }
 }
