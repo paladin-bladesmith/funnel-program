@@ -10,15 +10,6 @@ import { getAllProgramIdls, getToolchainArgument } from "./utils.mjs";
 const [idl, ...additionalIdls] = getAllProgramIdls().map(idl => rootNodeFromAnchor(require(idl)))
 const kinobi = k.createFromRoot(idl, additionalIdls);
 
-const ciDir = path.join(__dirname, "..", "ci");
-
-// Update programs.
-kinobi.update(
-  k.updateProgramsVisitor({
-    "featureGateProgram": { name: "featureGate" },
-  })
-);
-
 // Render JavaScript.
 const jsClient = path.join(__dirname, "..", "clients", "js");
 kinobi.accept(

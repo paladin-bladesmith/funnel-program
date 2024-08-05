@@ -2,7 +2,7 @@
 name = "paladin-funnel-program"
 version = "0.0.1"
 description = "Paladin Funnel Program"
-readme = "./README.md"
+readme = "../README.md"
 edition = "2021"
 
 [lib]
