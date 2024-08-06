@@ -24,6 +24,7 @@ struct RewardDistribution {
 }
 
 // Calculate the distribution of the amount.
+// Throws for an amount > u64::MAX / 2.
 //
 // * 10% to the treasury.
 // * 40% to all token stakers.
@@ -146,10 +147,10 @@ mod tests {
     proptest! {
         #[test]
         fn test_calculate_distribution(
-            amount in 0u64..u64::MAX / 2,
+            amount in 0..u64::MAX / 2,
         ) {
             // Calculate.
-            let result = calculate_distribution(amount);
+            let result = calculate_distribution(amount).unwrap();
             // Evaluate.
 
             // The calculation consists of three steps, so evaluate each step
@@ -160,16 +161,11 @@ mod tests {
             // 3. treasury rewards
 
             // Step 1.
-            let stakers_reward_num = amount.checked_mul(2);
-            if stakers_reward_num.is_none() {
-                // If the stakers rewards numerator multiplication breaks the
-                // u64 ceiling, the function should return an error.
-                prop_assert_eq!(result, Err(ProgramError::InvalidInstructionData));
-                return Ok(());
-            }
-            // Since we're always dividing by 5, the division should never
-            // return `None`, so we can unwrap here.
-            let stakers_reward = stakers_reward_num.unwrap().checked_div(5).unwrap();
+            // Since the amount input is limited to u64::MAX / 2, the
+            // multiplication by 2 should never overflow `u64`, and since we're
+            // always dividing by 5, the division should never return `None`,
+            // so we can unwrap here.
+            let stakers_reward = amount.checked_mul(2).and_then(|p| p.checked_div(5)).unwrap();
 
             // Step 2.
             //
@@ -192,11 +188,11 @@ mod tests {
                 .unwrap();
 
             // The function should return the correct distribution.
-            prop_assert_eq!(result, Ok(RewardDistribution {
+            prop_assert_eq!(result, RewardDistribution {
                 treasury_reward,
                 stakers_reward,
                 holders_reward,
-            }));
+            });
         }
     }
 }
