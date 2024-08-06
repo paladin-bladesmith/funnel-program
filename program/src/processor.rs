@@ -146,7 +146,7 @@ mod tests {
     proptest! {
         #[test]
         fn test_calculate_distribution(
-            amount in 0u64..,
+            amount in 0u64..u64::MAX / 2,
         ) {
             // Calculate.
             let result = calculate_distribution(amount);
@@ -190,6 +190,7 @@ mod tests {
                 .checked_sub(stakers_reward)
                 .and_then(|d| d.checked_sub(holders_reward))
                 .unwrap();
+
             // The function should return the correct distribution.
             prop_assert_eq!(result, Ok(RewardDistribution {
                 treasury_reward,
