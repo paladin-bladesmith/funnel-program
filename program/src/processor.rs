@@ -16,7 +16,7 @@ use {
     },
 };
 
-#[allow(unused)]
+#[derive(Debug, PartialEq)]
 struct RewardDistribution {
     treasury_reward: u64,
     stakers_reward: u64,
@@ -24,6 +24,7 @@ struct RewardDistribution {
 }
 
 // Calculate the distribution of the amount.
+// Throws for an amount > u64::MAX / 2.
 //
 // * 10% to the treasury.
 // * 40% to all token stakers.
@@ -37,9 +38,9 @@ fn calculate_distribution(amount: u64) -> Result<RewardDistribution, ProgramErro
         .checked_div(2)
         .ok_or(ProgramError::InvalidInstructionData)?;
     let treasury_reward = amount
-        .checked_sub(holders_reward)
-        .unwrap()
         .checked_sub(stakers_reward)
+        .unwrap()
+        .checked_sub(holders_reward)
         .unwrap();
 
     Ok(RewardDistribution {
@@ -135,6 +136,63 @@ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> P
         PaladinFunnelInstruction::DistributeRewards { amount } => {
             msg!("Instruction: DistributeRewards");
             process_distribute_rewards(program_id, accounts, amount)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use {super::*, proptest::prelude::*};
+
+    proptest! {
+        #[test]
+        fn test_calculate_distribution(
+            amount in 0..u64::MAX / 2,
+        ) {
+            // Calculate.
+            let result = calculate_distribution(amount).unwrap();
+            // Evaluate.
+
+            // The calculation consists of three steps, so evaluate each step
+            // one at a time.
+            //
+            // 1. stakers rewards
+            // 2. holders rewards
+            // 3. treasury rewards
+
+            // Step 1.
+            // Since the amount input is limited to u64::MAX / 2, the
+            // multiplication by 2 should never overflow `u64`, and since we're
+            // always dividing by 5, the division should never return `None`,
+            // so we can unwrap here.
+            let stakers_reward = amount.checked_mul(2).and_then(|p| p.checked_div(5)).unwrap();
+
+            // Step 2.
+            //
+            // Since we're always dividing by 2, the division should never
+            // return `None`, so we can unwrap here.
+            let holders_reward = amount.checked_div(2).unwrap();
+
+            // Step 3.
+            //
+            // Since we're always subtracting the stakers and holders rewards
+            // from the total amount, the subtraction should never return
+            // `None`, so we can unwrap here.
+            //
+            // This is because, if the above math succeeds, we know that the
+            // stakers rewards are 40% of the amount and the holders rewards are
+            // 50% of the amount.
+            let treasury_reward = amount
+                .checked_sub(stakers_reward)
+                .and_then(|d| d.checked_sub(holders_reward))
+                .unwrap();
+
+            // The function should return the correct distribution.
+            prop_assert_eq!(result, RewardDistribution {
+                treasury_reward,
+                stakers_reward,
+                holders_reward,
+            });
         }
     }
 }
