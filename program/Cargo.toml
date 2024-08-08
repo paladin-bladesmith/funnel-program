@@ -9,7 +9,7 @@ edition = "2021"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-paladin-governance-program = { git = "https://github.com/paladin-bladesmith/governance-program.git" }
+paladin-governance-program-client = { git = "https://github.com/paladin-bladesmith/governance-program.git" }
 paladin-rewards-program-client = { git = "https://github.com/paladin-bladesmith/rewards-program.git" }
 paladin-stake-program-client = { git = "https://github.com/paladin-bladesmith/stake-program.git" }
 shank = "0.4.2"

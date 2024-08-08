@@ -2,7 +2,7 @@
 
 use {
     crate::{error::PaladinFunnelError, instruction::PaladinFunnelInstruction},
-    paladin_governance_program::{state::get_treasury_address, ID as GOVERNANCE_PROGRAM_ID},
+    paladin_governance_program_client::pdas::find_treasury_pda,
     paladin_rewards_program_client::ID as REWARDS_PROGRAM_ID,
     paladin_stake_program_client::ID as STAKE_PROGRAM_ID,
     solana_program::{
@@ -74,7 +74,7 @@ fn process_distribute_rewards(
     }
 
     // Ensure the proper treasury account was provided.
-    if get_treasury_address(&GOVERNANCE_PROGRAM_ID) != *treasury_info.key {
+    if find_treasury_pda(stake_config_info.key).0 != *treasury_info.key {
         return Err(PaladinFunnelError::IncorrectTreasuryAddress.into());
     }
 

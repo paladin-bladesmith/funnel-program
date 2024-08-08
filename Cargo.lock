@@ -65,6 +65,17 @@ dependencies = [
 
 [[package]]
 name = "ahash"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
+dependencies = [
+ "getrandom 0.2.15",
+ "once_cell",
+ "version_check",
+]
+
+[[package]]
+name = "ahash"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e89da841a80418a9b391ebaea17f5c112ffaaa96f621d2c285b5174da76b9011"
@@ -519,7 +530,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4114279215a005bc675e386011e594e1d9b800918cea18fcadadcce864a2046b"
 dependencies = [
  "borsh-derive 0.10.3",
- "hashbrown 0.13.2",
+ "hashbrown 0.12.3",
 ]
 
 [[package]]
@@ -1553,6 +1564,9 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
+dependencies = [
+ "ahash 0.7.8",
+]
 
 [[package]]
 name = "hashbrown"
@@ -1560,7 +1574,7 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
- "ahash",
+ "ahash 0.8.11",
 ]
 
 [[package]]
@@ -2423,7 +2437,7 @@ name = "paladin-funnel-program"
 version = "0.0.1"
 dependencies = [
  "borsh 0.10.3",
- "paladin-governance-program",
+ "paladin-governance-program-client",
  "paladin-rewards-program-client",
  "paladin-stake-program-client",
  "proptest",
@@ -2453,16 +2467,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "paladin-governance-program"
-version = "0.1.0"
-source = "git+https://github.com/paladin-bladesmith/governance-program.git#e58665c9f511b1cb60ec778b1522e276e64c9537"
+name = "paladin-governance-program-client"
+version = "0.0.1"
+source = "git+https://github.com/paladin-bladesmith/governance-program.git#09ab874821a9fffa15412b627b6799955e839772"
 dependencies = [
- "bytemuck",
- "paladin-stake-program",
+ "borsh 0.10.3",
+ "num-derive 0.3.3",
+ "num-traits",
  "solana-program",
- "spl-discriminator",
- "spl-pod",
- "spl-program-error",
+ "thiserror",
 ]
 
 [[package]]
@@ -2474,24 +2487,6 @@ dependencies = [
  "num-derive 0.3.3",
  "num-traits",
  "solana-program",
- "thiserror",
-]
-
-[[package]]
-name = "paladin-stake-program"
-version = "0.0.1"
-source = "git+https://github.com/paladin-bladesmith/stake-program.git?branch=version#7214513a6b962bdcaaad93607c6b631966f29e0e"
-dependencies = [
- "arrayref",
- "bytemuck",
- "num-derive 0.3.3",
- "num-traits",
- "shank",
- "solana-program",
- "spl-discriminator",
- "spl-pod",
- "spl-program-error",
- "spl-token-2022",
  "thiserror",
 ]
 
@@ -3945,7 +3940,7 @@ version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "add8084aadf3e08a897b4b45c53b7fe6770e5cd139d000dc23ecccd8d02dee85"
 dependencies = [
- "ahash",
+ "ahash 0.8.11",
  "lazy_static",
  "log",
  "rustc_version",
@@ -4072,7 +4067,7 @@ version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9251db32c27acf187bb23545e2275dbd71420cdc49379e477941374fb8fc7bae"
 dependencies = [
- "ahash",
+ "ahash 0.8.11",
  "bincode",
  "bv",
  "caps",

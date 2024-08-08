@@ -4,7 +4,7 @@ mod setup;
 
 use {
     paladin_funnel_program::{error::PaladinFunnelError, instruction::distribute_rewards},
-    paladin_governance_program::{state::get_treasury_address, ID as GOVERNANCE_PROGRAM_ID},
+    paladin_governance_program_client::{pdas::find_treasury_pda, ID as GOVERNANCE_PROGRAM_ID},
     paladin_rewards_program_client::{accounts::HolderRewardsPool, ID as REWARDS_PROGRAM_ID},
     paladin_stake_program_client::ID as STAKE_PROGRAM_ID,
     setup::{setup, setup_holder_rewards_pool_account, setup_mint, setup_stake_config_account},
@@ -27,7 +27,7 @@ async fn fail_payer_not_signer() {
     let stake_config_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
 
-    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let treasury_address = find_treasury_pda(&stake_config_address).0;
     let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
 
     let amount = 1_000_000;
@@ -117,7 +117,7 @@ async fn fail_incorrect_stake_program_id() {
     let stake_config_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
 
-    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let treasury_address = find_treasury_pda(&stake_config_address).0;
     let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
 
     let amount = 1_000_000;
@@ -163,7 +163,7 @@ async fn fail_incorrect_rewards_program_id() {
     let stake_config_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
 
-    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let treasury_address = find_treasury_pda(&stake_config_address).0;
     let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
 
     let amount = 1_000_000;
@@ -225,7 +225,7 @@ async fn success(amount: u64) {
     let stake_config_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
 
-    let treasury_address = get_treasury_address(&GOVERNANCE_PROGRAM_ID);
+    let treasury_address = find_treasury_pda(&stake_config_address).0;
     let holder_rewards_pool_address = HolderRewardsPool::find_pda(&token_mint_address).0;
 
     let mut context = setup().start_with_context().await;
