@@ -14,27 +14,27 @@ import {
 } from '@solana/web3.js';
 import { type ParsedDistributeRewardsInstruction } from '../instructions';
 
-export const PALADIN_FUNNEL_PROGRAM_PROGRAM_ADDRESS =
-  'Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ' as Address<'Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ'>;
+export const PALADIN_FUNNEL_PROGRAM_ADDRESS =
+  'PFunne1111111111111111111111111111111111111' as Address<'PFunne1111111111111111111111111111111111111'>;
 
-export enum PaladinFunnelProgramInstruction {
+export enum PaladinFunnelInstruction {
   DistributeRewards,
 }
 
-export function identifyPaladinFunnelProgramInstruction(
+export function identifyPaladinFunnelInstruction(
   instruction: { data: ReadonlyUint8Array } | ReadonlyUint8Array
-): PaladinFunnelProgramInstruction {
+): PaladinFunnelInstruction {
   const data = 'data' in instruction ? instruction.data : instruction;
   if (containsBytes(data, getU8Encoder().encode(0), 0)) {
-    return PaladinFunnelProgramInstruction.DistributeRewards;
+    return PaladinFunnelInstruction.DistributeRewards;
   }
   throw new Error(
-    'The provided instruction could not be identified as a paladinFunnelProgram instruction.'
+    'The provided instruction could not be identified as a paladinFunnel instruction.'
   );
 }
 
-export type ParsedPaladinFunnelProgramInstruction<
-  TProgram extends string = 'Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ',
+export type ParsedPaladinFunnelInstruction<
+  TProgram extends string = 'PFunne1111111111111111111111111111111111111',
 > = {
-  instructionType: PaladinFunnelProgramInstruction.DistributeRewards;
+  instructionType: PaladinFunnelInstruction.DistributeRewards;
 } & ParsedDistributeRewardsInstruction<TProgram>;

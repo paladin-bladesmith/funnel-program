@@ -6,5 +6,6 @@
  * @see https://github.com/kinobi-so/kinobi
  */
 
+export * from './errors';
 export * from './instructions';
 export * from './programs';

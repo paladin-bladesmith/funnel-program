@@ -82,9 +82,26 @@
       }
     }
   ],
+  "errors": [
+    {
+      "code": 0,
+      "name": "IncorrectTreasuryAddress",
+      "msg": "Incorrect treasury address."
+    },
+    {
+      "code": 1,
+      "name": "IncorrectStakeProgramAddress",
+      "msg": "Incorrect stake program address."
+    },
+    {
+      "code": 2,
+      "name": "IncorrectRewardsProgramAddress",
+      "msg": "Incorrect rewards program address."
+    }
+  ],
   "metadata": {
     "origin": "shank",
-    "address": "Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ",
+    "address": "PFunne1111111111111111111111111111111111111",
     "binaryVersion": "0.4.2",
     "libVersion": "0.4.2"
   }

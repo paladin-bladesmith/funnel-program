@@ -29,11 +29,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from '@solana/web3.js';
-import { PALADIN_FUNNEL_PROGRAM_PROGRAM_ADDRESS } from '../programs';
+import { PALADIN_FUNNEL_PROGRAM_ADDRESS } from '../programs';
 import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
 export type DistributeRewardsInstruction<
-  TProgram extends string = typeof PALADIN_FUNNEL_PROGRAM_PROGRAM_ADDRESS,
+  TProgram extends string = typeof PALADIN_FUNNEL_PROGRAM_ADDRESS,
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountTreasury extends string | IAccountMeta<string> = string,
   TAccountPaladinStakeProgram extends string | IAccountMeta<string> = string,
@@ -162,7 +162,7 @@ export function getDistributeRewardsInstruction<
     TAccountSystemProgram
   >
 ): DistributeRewardsInstruction<
-  typeof PALADIN_FUNNEL_PROGRAM_PROGRAM_ADDRESS,
+  typeof PALADIN_FUNNEL_PROGRAM_ADDRESS,
   TAccountPayer,
   TAccountTreasury,
   TAccountPaladinStakeProgram,
@@ -173,7 +173,7 @@ export function getDistributeRewardsInstruction<
   TAccountSystemProgram
 > {
   // Program address.
-  const programAddress = PALADIN_FUNNEL_PROGRAM_PROGRAM_ADDRESS;
+  const programAddress = PALADIN_FUNNEL_PROGRAM_ADDRESS;
 
   // Original accounts.
   const originalAccounts = {
@@ -226,7 +226,7 @@ export function getDistributeRewardsInstruction<
       args as DistributeRewardsInstructionDataArgs
     ),
   } as DistributeRewardsInstruction<
-    typeof PALADIN_FUNNEL_PROGRAM_PROGRAM_ADDRESS,
+    typeof PALADIN_FUNNEL_PROGRAM_ADDRESS,
     TAccountPayer,
     TAccountTreasury,
     TAccountPaladinStakeProgram,
@@ -241,7 +241,7 @@ export function getDistributeRewardsInstruction<
 }
 
 export type ParsedDistributeRewardsInstruction<
-  TProgram extends string = typeof PALADIN_FUNNEL_PROGRAM_PROGRAM_ADDRESS,
+  TProgram extends string = typeof PALADIN_FUNNEL_PROGRAM_ADDRESS,
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
   programAddress: Address<TProgram>;

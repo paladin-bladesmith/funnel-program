@@ -2423,7 +2423,9 @@ name = "paladin-funnel-program"
 version = "0.0.1"
 dependencies = [
  "borsh 0.10.3",
- "paladin-governance-program",
+ "num-derive 0.3.3",
+ "num-traits",
+ "paladin-governance-program-client",
  "paladin-rewards-program-client",
  "paladin-stake-program-client",
  "proptest",
@@ -2431,9 +2433,9 @@ dependencies = [
  "solana-program",
  "solana-program-test",
  "solana-sdk",
- "spl-program-error",
  "spl-token-2022",
  "test-case",
+ "thiserror",
 ]
 
 [[package]]
@@ -2453,16 +2455,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "paladin-governance-program"
-version = "0.1.0"
-source = "git+https://github.com/paladin-bladesmith/governance-program.git#e58665c9f511b1cb60ec778b1522e276e64c9537"
+name = "paladin-governance-program-client"
+version = "0.0.1"
+source = "git+https://github.com/paladin-bladesmith/governance-program.git#09ab874821a9fffa15412b627b6799955e839772"
 dependencies = [
- "bytemuck",
- "paladin-stake-program",
+ "borsh 0.10.3",
+ "num-derive 0.3.3",
+ "num-traits",
  "solana-program",
- "spl-discriminator",
- "spl-pod",
- "spl-program-error",
+ "thiserror",
 ]
 
 [[package]]
@@ -2478,27 +2479,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "paladin-stake-program"
-version = "0.0.1"
-source = "git+https://github.com/paladin-bladesmith/stake-program.git?branch=version#7214513a6b962bdcaaad93607c6b631966f29e0e"
-dependencies = [
- "arrayref",
- "bytemuck",
- "num-derive 0.3.3",
- "num-traits",
- "shank",
- "solana-program",
- "spl-discriminator",
- "spl-pod",
- "spl-program-error",
- "spl-token-2022",
- "thiserror",
-]
-
-[[package]]
 name = "paladin-stake-program-client"
 version = "0.0.1"
-source = "git+https://github.com/paladin-bladesmith/stake-program.git#deb674ebc64792566b72c220f62770d1b3d8ef84"
+source = "git+https://github.com/paladin-bladesmith/stake-program.git#97e8a95e467214dbe446a3bd401601106606bdd2"
 dependencies = [
  "borsh 0.10.3",
  "num-derive 0.3.3",
