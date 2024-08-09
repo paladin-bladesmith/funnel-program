@@ -2437,6 +2437,8 @@ name = "paladin-funnel-program"
 version = "0.0.1"
 dependencies = [
  "borsh 0.10.3",
+ "num-derive 0.3.3",
+ "num-traits",
  "paladin-governance-program-client",
  "paladin-rewards-program-client",
  "paladin-stake-program-client",
@@ -2445,9 +2447,9 @@ dependencies = [
  "solana-program",
  "solana-program-test",
  "solana-sdk",
- "spl-program-error",
  "spl-token-2022",
  "test-case",
+ "thiserror",
 ]
 
 [[package]]
