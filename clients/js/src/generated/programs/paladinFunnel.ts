@@ -15,7 +15,7 @@ import {
 import { type ParsedDistributeRewardsInstruction } from '../instructions';
 
 export const PALADIN_FUNNEL_PROGRAM_ADDRESS =
-  'Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ' as Address<'Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ'>;
+  'PFunne1111111111111111111111111111111111111' as Address<'PFunne1111111111111111111111111111111111111'>;
 
 export enum PaladinFunnelInstruction {
   DistributeRewards,
@@ -34,7 +34,7 @@ export function identifyPaladinFunnelInstruction(
 }
 
 export type ParsedPaladinFunnelInstruction<
-  TProgram extends string = 'Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ',
+  TProgram extends string = 'PFunne1111111111111111111111111111111111111',
 > = {
   instructionType: PaladinFunnelInstruction.DistributeRewards;
 } & ParsedDistributeRewardsInstruction<TProgram>;

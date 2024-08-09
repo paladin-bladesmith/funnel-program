@@ -7,4 +7,4 @@
 use solana_program::{pubkey, pubkey::Pubkey};
 
 /// `paladin_funnel` program ID.
-pub const PALADIN_FUNNEL_ID: Pubkey = pubkey!("Dbf7u6x15DhjMrBMunY3XoRWdByrCCt2dbyoPrCXN6SQ");
+pub const PALADIN_FUNNEL_ID: Pubkey = pubkey!("PFunne1111111111111111111111111111111111111");
