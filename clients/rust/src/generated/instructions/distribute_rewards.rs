@@ -10,8 +10,6 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub struct DistributeRewards {
     /// Payer account
     pub payer: solana_program::pubkey::Pubkey,
-    /// Treasury account
-    pub treasury: solana_program::pubkey::Pubkey,
     /// Paladin Stake program
     pub paladin_stake_program: solana_program::pubkey::Pubkey,
     /// Stake config account
@@ -39,13 +37,9 @@ impl DistributeRewards {
         args: DistributeRewardsInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.treasury,
-            false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.paladin_stake_program,
@@ -114,18 +108,16 @@ pub struct DistributeRewardsInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` payer
-///   1. `[writable]` treasury
-///   2. `[]` paladin_stake_program
-///   3. `[writable]` stake_config
-///   4. `[]` paladin_rewards_program
-///   5. `[writable]` holder_rewards_pool
-///   6. `[]` token_mint
-///   7. `[optional]` system_program (default to
+///   1. `[]` paladin_stake_program
+///   2. `[writable]` stake_config
+///   3. `[]` paladin_rewards_program
+///   4. `[writable]` holder_rewards_pool
+///   5. `[]` token_mint
+///   6. `[optional]` system_program (default to
 ///      `11111111111111111111111111111111`)
 #[derive(Clone, Debug, Default)]
 pub struct DistributeRewardsBuilder {
     payer: Option<solana_program::pubkey::Pubkey>,
-    treasury: Option<solana_program::pubkey::Pubkey>,
     paladin_stake_program: Option<solana_program::pubkey::Pubkey>,
     stake_config: Option<solana_program::pubkey::Pubkey>,
     paladin_rewards_program: Option<solana_program::pubkey::Pubkey>,
@@ -144,12 +136,6 @@ impl DistributeRewardsBuilder {
     #[inline(always)]
     pub fn payer(&mut self, payer: solana_program::pubkey::Pubkey) -> &mut Self {
         self.payer = Some(payer);
-        self
-    }
-    /// Treasury account
-    #[inline(always)]
-    pub fn treasury(&mut self, treasury: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.treasury = Some(treasury);
         self
     }
     /// Paladin Stake program
@@ -225,7 +211,6 @@ impl DistributeRewardsBuilder {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = DistributeRewards {
             payer: self.payer.expect("payer is not set"),
-            treasury: self.treasury.expect("treasury is not set"),
             paladin_stake_program: self
                 .paladin_stake_program
                 .expect("paladin_stake_program is not set"),
@@ -253,8 +238,6 @@ impl DistributeRewardsBuilder {
 pub struct DistributeRewardsCpiAccounts<'a, 'b> {
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Treasury account
-    pub treasury: &'b solana_program::account_info::AccountInfo<'a>,
     /// Paladin Stake program
     pub paladin_stake_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Stake config account
@@ -275,8 +258,6 @@ pub struct DistributeRewardsCpi<'a, 'b> {
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Treasury account
-    pub treasury: &'b solana_program::account_info::AccountInfo<'a>,
     /// Paladin Stake program
     pub paladin_stake_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Stake config account
@@ -302,7 +283,6 @@ impl<'a, 'b> DistributeRewardsCpi<'a, 'b> {
         Self {
             __program: program,
             payer: accounts.payer,
-            treasury: accounts.treasury,
             paladin_stake_program: accounts.paladin_stake_program,
             stake_config: accounts.stake_config,
             paladin_rewards_program: accounts.paladin_rewards_program,
@@ -345,14 +325,10 @@ impl<'a, 'b> DistributeRewardsCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
             true,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.treasury.key,
-            false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.paladin_stake_program.key,
@@ -396,10 +372,9 @@ impl<'a, 'b> DistributeRewardsCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(8 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.payer.clone());
-        account_infos.push(self.treasury.clone());
         account_infos.push(self.paladin_stake_program.clone());
         account_infos.push(self.stake_config.clone());
         account_infos.push(self.paladin_rewards_program.clone());
@@ -423,13 +398,12 @@ impl<'a, 'b> DistributeRewardsCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` payer
-///   1. `[writable]` treasury
-///   2. `[]` paladin_stake_program
-///   3. `[writable]` stake_config
-///   4. `[]` paladin_rewards_program
-///   5. `[writable]` holder_rewards_pool
-///   6. `[]` token_mint
-///   7. `[]` system_program
+///   1. `[]` paladin_stake_program
+///   2. `[writable]` stake_config
+///   3. `[]` paladin_rewards_program
+///   4. `[writable]` holder_rewards_pool
+///   5. `[]` token_mint
+///   6. `[]` system_program
 #[derive(Clone, Debug)]
 pub struct DistributeRewardsCpiBuilder<'a, 'b> {
     instruction: Box<DistributeRewardsCpiBuilderInstruction<'a, 'b>>,
@@ -440,7 +414,6 @@ impl<'a, 'b> DistributeRewardsCpiBuilder<'a, 'b> {
         let instruction = Box::new(DistributeRewardsCpiBuilderInstruction {
             __program: program,
             payer: None,
-            treasury: None,
             paladin_stake_program: None,
             stake_config: None,
             paladin_rewards_program: None,
@@ -456,15 +429,6 @@ impl<'a, 'b> DistributeRewardsCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn payer(&mut self, payer: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.payer = Some(payer);
-        self
-    }
-    /// Treasury account
-    #[inline(always)]
-    pub fn treasury(
-        &mut self,
-        treasury: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.treasury = Some(treasury);
         self
     }
     /// Paladin Stake program
@@ -576,8 +540,6 @@ impl<'a, 'b> DistributeRewardsCpiBuilder<'a, 'b> {
 
             payer: self.instruction.payer.expect("payer is not set"),
 
-            treasury: self.instruction.treasury.expect("treasury is not set"),
-
             paladin_stake_program: self
                 .instruction
                 .paladin_stake_program
@@ -617,7 +579,6 @@ impl<'a, 'b> DistributeRewardsCpiBuilder<'a, 'b> {
 struct DistributeRewardsCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    treasury: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     paladin_stake_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     stake_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     paladin_rewards_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,

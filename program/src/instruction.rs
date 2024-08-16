@@ -33,13 +33,12 @@ pub enum PaladinFunnelInstruction {
     /// Accounts expected by this instruction:
     ///
     /// 0. `[w, s]` Payer account.
-    /// 1. `[w]` Treasury account.
-    /// 2. `[ ]` Paladin Stake program.
-    /// 3. `[w]` Stake config account.
-    /// 4. `[ ]` Paladin Rewards program.
-    /// 5. `[w]` Holder rewards pool account.
-    /// 6. `[ ]` Token mint.
-    /// 7. `[ ]` System program.
+    /// 1. `[ ]` Paladin Stake program.
+    /// 2. `[w]` Stake config account.
+    /// 3. `[ ]` Paladin Rewards program.
+    /// 4. `[w]` Holder rewards pool account.
+    /// 5. `[ ]` Token mint.
+    /// 6. `[ ]` System program.
     #[account(
         0,
         writable,
@@ -49,39 +48,33 @@ pub enum PaladinFunnelInstruction {
     )]
     #[account(
         1,
-        writable,
-        name = "treasury",
-        description = "Treasury account",
-    )]
-    #[account(
-        2,
         name = "paladin_stake_program",
         description = "Paladin Stake program",
     )]
     #[account(
-        3,
+        2,
         writable,
         name = "stake_config",
         description = "Stake config account",
     )]
     #[account(
-        4,
+        3,
         name = "paladin_rewards_program",
         description = "Paladin Rewards program",
     )]
     #[account(
-        5,
+        4,
         writable,
         name = "holder_rewards_pool",
         description = "Holder rewards pool account",
     )]
     #[account(
-        6,
+        5,
         name = "token_mint",
         description = "Token mint",
     )]
     #[account(
-        7,
+        6,
         name = "system_program",
         description = "System program",
     )]
@@ -122,7 +115,6 @@ impl PaladinFunnelInstruction {
 #[allow(clippy::too_many_arguments)]
 pub fn distribute_rewards(
     payer_address: &Pubkey,
-    treasury_address: &Pubkey,
     stake_program_address: &Pubkey,
     stake_config_address: &Pubkey,
     rewards_program_address: &Pubkey,
@@ -132,7 +124,6 @@ pub fn distribute_rewards(
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*payer_address, true),
-        AccountMeta::new(*treasury_address, false),
         AccountMeta::new_readonly(*stake_program_address, false),
         AccountMeta::new(*stake_config_address, false),
         AccountMeta::new_readonly(*rewards_program_address, false),
