@@ -14,14 +14,6 @@
           ]
         },
         {
-          "name": "treasury",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Treasury account"
-          ]
-        },
-        {
           "name": "paladinStakeProgram",
           "isMut": false,
           "isSigner": false,

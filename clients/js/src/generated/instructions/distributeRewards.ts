@@ -35,7 +35,6 @@ import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 export type DistributeRewardsInstruction<
   TProgram extends string = typeof PALADIN_FUNNEL_PROGRAM_ADDRESS,
   TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountTreasury extends string | IAccountMeta<string> = string,
   TAccountPaladinStakeProgram extends string | IAccountMeta<string> = string,
   TAccountStakeConfig extends string | IAccountMeta<string> = string,
   TAccountPaladinRewardsProgram extends string | IAccountMeta<string> = string,
@@ -53,9 +52,6 @@ export type DistributeRewardsInstruction<
         ? WritableSignerAccount<TAccountPayer> &
             IAccountSignerMeta<TAccountPayer>
         : TAccountPayer,
-      TAccountTreasury extends string
-        ? WritableAccount<TAccountTreasury>
-        : TAccountTreasury,
       TAccountPaladinStakeProgram extends string
         ? ReadonlyAccount<TAccountPaladinStakeProgram>
         : TAccountPaladinStakeProgram,
@@ -114,7 +110,6 @@ export function getDistributeRewardsInstructionDataCodec(): Codec<
 
 export type DistributeRewardsInput<
   TAccountPayer extends string = string,
-  TAccountTreasury extends string = string,
   TAccountPaladinStakeProgram extends string = string,
   TAccountStakeConfig extends string = string,
   TAccountPaladinRewardsProgram extends string = string,
@@ -124,8 +119,6 @@ export type DistributeRewardsInput<
 > = {
   /** Payer account */
   payer: TransactionSigner<TAccountPayer>;
-  /** Treasury account */
-  treasury: Address<TAccountTreasury>;
   /** Paladin Stake program */
   paladinStakeProgram: Address<TAccountPaladinStakeProgram>;
   /** Stake config account */
@@ -143,7 +136,6 @@ export type DistributeRewardsInput<
 
 export function getDistributeRewardsInstruction<
   TAccountPayer extends string,
-  TAccountTreasury extends string,
   TAccountPaladinStakeProgram extends string,
   TAccountStakeConfig extends string,
   TAccountPaladinRewardsProgram extends string,
@@ -153,7 +145,6 @@ export function getDistributeRewardsInstruction<
 >(
   input: DistributeRewardsInput<
     TAccountPayer,
-    TAccountTreasury,
     TAccountPaladinStakeProgram,
     TAccountStakeConfig,
     TAccountPaladinRewardsProgram,
@@ -164,7 +155,6 @@ export function getDistributeRewardsInstruction<
 ): DistributeRewardsInstruction<
   typeof PALADIN_FUNNEL_PROGRAM_ADDRESS,
   TAccountPayer,
-  TAccountTreasury,
   TAccountPaladinStakeProgram,
   TAccountStakeConfig,
   TAccountPaladinRewardsProgram,
@@ -178,7 +168,6 @@ export function getDistributeRewardsInstruction<
   // Original accounts.
   const originalAccounts = {
     payer: { value: input.payer ?? null, isWritable: true },
-    treasury: { value: input.treasury ?? null, isWritable: true },
     paladinStakeProgram: {
       value: input.paladinStakeProgram ?? null,
       isWritable: false,
@@ -213,7 +202,6 @@ export function getDistributeRewardsInstruction<
   const instruction = {
     accounts: [
       getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.treasury),
       getAccountMeta(accounts.paladinStakeProgram),
       getAccountMeta(accounts.stakeConfig),
       getAccountMeta(accounts.paladinRewardsProgram),
@@ -228,7 +216,6 @@ export function getDistributeRewardsInstruction<
   } as DistributeRewardsInstruction<
     typeof PALADIN_FUNNEL_PROGRAM_ADDRESS,
     TAccountPayer,
-    TAccountTreasury,
     TAccountPaladinStakeProgram,
     TAccountStakeConfig,
     TAccountPaladinRewardsProgram,
@@ -248,20 +235,18 @@ export type ParsedDistributeRewardsInstruction<
   accounts: {
     /** Payer account */
     payer: TAccountMetas[0];
-    /** Treasury account */
-    treasury: TAccountMetas[1];
     /** Paladin Stake program */
-    paladinStakeProgram: TAccountMetas[2];
+    paladinStakeProgram: TAccountMetas[1];
     /** Stake config account */
-    stakeConfig: TAccountMetas[3];
+    stakeConfig: TAccountMetas[2];
     /** Paladin Rewards program */
-    paladinRewardsProgram: TAccountMetas[4];
+    paladinRewardsProgram: TAccountMetas[3];
     /** Holder rewards pool account */
-    holderRewardsPool: TAccountMetas[5];
+    holderRewardsPool: TAccountMetas[4];
     /** Token mint */
-    tokenMint: TAccountMetas[6];
+    tokenMint: TAccountMetas[5];
     /** System program */
-    systemProgram: TAccountMetas[7];
+    systemProgram: TAccountMetas[6];
   };
   data: DistributeRewardsInstructionData;
 };
@@ -274,7 +259,7 @@ export function parseDistributeRewardsInstruction<
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>
 ): ParsedDistributeRewardsInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 8) {
+  if (instruction.accounts.length < 7) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
   }
@@ -288,7 +273,6 @@ export function parseDistributeRewardsInstruction<
     programAddress: instruction.programAddress,
     accounts: {
       payer: getNextAccount(),
-      treasury: getNextAccount(),
       paladinStakeProgram: getNextAccount(),
       stakeConfig: getNextAccount(),
       paladinRewardsProgram: getNextAccount(),
